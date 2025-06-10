@@ -47,7 +47,35 @@ public class Admin extends Employé{
     }
 
     public void retirerunemployé(String email){
-        Gson gson
+        Gson gson=new Gson();
+        File file = new File(FICHIER_JSON);
+        List<Employé>employés=new ArrayList<>();
+        try {
+            if (file.exists() && file.length() > 0) {
+              try( FileReader read = new FileReader(file)){
+                  Type listtype=new TypeToken<List<Employé>>() {}.getType();
+                  List<Employé> temp = gson.fromJson(read, listtype);
+                  if (temp != null) {employés = temp;}
+                }
+            }
+        }catch (IOException | JsonSyntaxException e) {
+            System.err.println("Erreur lors de la lecture du fichier : " + e.getMessage());
+        }
+        String valeuràsupprimer;
+        for(int i =0;i< employés.size();i++){
+            if (employés.get(i).getEmail().equals(email)){
+                employés.remove(i);
+            }
+        }
+
+        try(FileWriter write=new FileWriter(file)){
+            gson.toJson(employés, write);
+
+            System.out.println("Employé retiré avec succès");
+        }catch (IOException m){
+            System.err.println("Erreur lors de l'écriture dans le fichier : " + m.getMessage());
+        }
+
     }
 
 
