@@ -9,9 +9,9 @@ import java.util.*;
 public class Admin extends Employé{
     private static final String FICHIER_JSON ="data.json";
 
-    public Admin(String prenom,String nom,String email, int tel)
+    public Admin(String prenom,String nom,String email, int tel,String motdepasse)
     {
-        super(prenom,nom,email,tel);
+        super(prenom,nom,email,tel,motdepasse);
     }
 
     public void ajouterunemployé(String prenom, String nom, String email, int tel) {
@@ -34,7 +34,7 @@ public class Admin extends Employé{
             // On continue avec employés vide
         }
 
-        Employé e = new Employé(prenom, nom, email, tel);
+        Employé e = new Employé(prenom, nom, email, tel, motdepasse);
         employés.add(e);
 
         try (Writer write = new FileWriter(file)) {
