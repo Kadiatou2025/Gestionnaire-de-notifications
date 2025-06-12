@@ -5,7 +5,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
 
-public class Employé {
+public class Employé implements observateur {
     private String prenom;
     private String nom;
     private String email;
@@ -14,6 +14,7 @@ public class Employé {
     boolean estabonné=false;
     private static final String FICHIER_JSON ="data.json";
     public String userconnect;
+    public static List<Employé>lesemployés=new ArrayList<>();
 
     //constructeur
     public Employé(String prenom,String nom,String email,int tel, String motdepasse){
@@ -111,7 +112,7 @@ public class Employé {
                 try( FileReader read = new FileReader(file)){
                     Type listtype=new TypeToken<List<Employé>>() {}.getType();
                     List<Employé> temp = gson.fromJson(read, listtype);
-                    if (temp != null) {employés = temp;}
+                    if (temp != null) {employés = temp;lesemployés=temp;}
                 }
             }
         }catch (IOException | JsonSyntaxException e) {
@@ -119,27 +120,83 @@ public class Employé {
         }
         for(int i=0;i<employés.size();i++){
             if(employés.get(i).getEmail().equals(userconnect)){
-                if (employés.get(i).estabonné) {
+                if (employés.get(i).estabonné==false) {
                     employés.get(i).estabonné = true;
-                    System.out.println("Vous etes abonné(e)s avec succès");
+
                 } else {
                     System.out.println("Vous etes déjà abonné(e)s");
                 }
             }
             }
+
+        try(FileWriter write=new FileWriter(file)){
+            gson.toJson(employés, write);
+
+            System.out.println("Vous etes abonné(e)s avec succès");
+        }catch (IOException m){
+            System.err.println("Erreur lors de l'écriture dans le fichier : " + m.getMessage());
+        }
         }
 
 
     public void désabonner(){
-        if (estabonné==true){
-            this.estabonné=false;
-            System.out.println("Vous avez été désabonné(e)s");
-        }else {
-            System.out.println("Vous etes déjà désabonné(e)s");
+
+        Gson gson=new Gson();
+        File file = new File(FICHIER_JSON);
+        List<Employé>employés=new ArrayList<>();
+        try {
+            if (file.exists() && file.length() > 0) {
+                try( FileReader read = new FileReader(file)){
+                    Type listtype=new TypeToken<List<Employé>>() {}.getType();
+                    List<Employé> temp = gson.fromJson(read, listtype);
+                    if (temp != null) {employés = temp;}
+                }
+            }
+        }catch (IOException | JsonSyntaxException e) {
+            System.err.println("Erreur lors de la lecture du fichier : " + e.getMessage());
         }
+
+        for(int i=0;i<employés.size();i++){
+            if(employés.get(i).getEmail().equals(userconnect)){
+                if (employés.get(i).estabonné==true) {
+                    employés.get(i).estabonné = false;
+
+                } else {
+                    System.out.println("Vous etes déjà désabonné(e)s");
+                }
+            }
+        }
+
+        try(FileWriter write=new FileWriter(file)){
+            gson.toJson(employés, write);
+
+            System.out.println("Vous avez été désabonné(e)s");
+        }catch (IOException m){
+            System.err.println("Erreur lors de l'écriture dans le fichier : " + m.getMessage());
+        }
+
+
     }
     public void envoyerdesnotifications(){}
 
     public void Afficherlesnotifications(){}
+    //interface
 
+
+    @Override
+    public void evoyernotification(String message) {
+        for(Employé e:lesemployés){
+            if(e.getEmail().equals(this.email)){
+                if(e.estabonné==true){
+                    System.out.println("Bonjour"+e.getPrenom()+e.getNom()+","+ "\n"+ message);
+                }
+            }
+        }
+
+    }
+
+    @Override
+    public void receptionnotification(String message, String nom, String prenom) {
+
+    }
 }
